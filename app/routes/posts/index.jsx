@@ -1,31 +1,34 @@
 import { Link, useLoaderData } from "remix";
+import { db } from "~/utils/db.server";
 
-export const loader = () => {
+export const loader = async () => {
   const data = {
-    post: [
-      { id: 1, title: "Post 1", body: "Post1 Test" },
-      { id: 2, title: "Post 2", body: "Post2 Test" },
-      { id: 3, title: "Post 3", body: "Post3 Test" },
-    ],
+    posts: await db.post.findMany({
+      take: 20,
+      select: { id: true, title: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+    }),
   };
   return data;
 };
 
 const PostItems = () => {
-  const { post } = useLoaderData();
+  const { posts } = useLoaderData();
+
   return (
     <>
       <div className="page-header">
-        <h1>Post</h1>
+        <h1>Posts</h1>
         <Link to="/posts/new" className="btn">
           New Post
         </Link>
       </div>
       <ul className="posts-list">
-        {post?.map((post) => (
+        {posts?.map((post) => (
           <li key={post.id}>
             <Link to={post.id}>
               <h3>{post.title}</h3>
+              {new Date(post.createdAt).toLocaleDateString()}
             </Link>
           </li>
         ))}
