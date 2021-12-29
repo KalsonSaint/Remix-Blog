@@ -16,6 +16,15 @@ export const login = async ({ username, password }) => {
   return user;
 };
 
+//Register User
+export const register = async ({ username, password }) => {
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  return db.user.create({
+    data: { username, passwordHash },
+  });
+};
+
 // Get Session Secret
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) throw new Error("No Session Secret");
@@ -74,5 +83,3 @@ export const logout = async (request: Request) => {
     headers: { "Set-Cookie": await storage.destroySession(session) },
   });
 };
-
-//Register User

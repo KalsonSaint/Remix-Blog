@@ -75,7 +75,9 @@ const Layout = ({ children }) => {
           {user ? (
             <li>
               <form action="/auth/logout" method="POST">
-                <button className="btn btn-delete">Logout</button>
+                <button className="btn btn-delete">
+                  Logout {user.username}
+                </button>
               </form>
             </li>
           ) : (

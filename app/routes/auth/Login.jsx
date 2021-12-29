@@ -1,6 +1,6 @@
 import { useActionData, json, redirect } from "remix";
 import { db } from "~/utils/db.server";
-import { login, createUserSession } from "~/utils/session.server";
+import { login, createUserSession, register } from "~/utils/session.server";
 
 function validateUsername(username) {
   if (typeof username !== "string" || username.length < 3) {
@@ -55,10 +55,28 @@ export const action = async ({ request }) => {
     }
 
     case "register": {
+      // Check if User exists
+      const userExists = await db.user.findFirst({
+        where: {
+          username,
+        },
+      });
+      if (userExists) {
+        return badRequest({
+          fields,
+          fieldErrors: { username: `User ${username} already exists` },
+        });
+      }
+
+      const user = await register({ username, password });
+      if (!user) {
+        return badRequest({ fields, formError: "Something went wrong" });
+      }
+      return createUserSession(user.id, "/posts");
     }
 
     default: {
-      return badRequest({ fields, formError: "Logiin type is not valid" });
+      return badRequest({ fields, formError: "Login type is not valid" });
     }
   }
 };
@@ -88,7 +106,13 @@ const Login = () => {
               Login
             </label>
             <label>
-              <input type="radio" name="loginType" value="register" /> Register
+              <input
+                type="radio"
+                name="loginType"
+                value="register"
+                defaultChecked={actionData?.fields?.loginType === "register"}
+              />{" "}
+              Register
             </label>
           </fieldset>
           <div className="form-control">
@@ -98,7 +122,6 @@ const Login = () => {
               name="username"
               id="username"
               defaultValue={actionData?.fields?.username}
-              required
             />
             <div className="error">
               {actionData?.fieldErrors?.username ? (
@@ -114,7 +137,12 @@ const Login = () => {
           </div>
           <div className="form-control">
             <label htmlFor="password">Password</label>
-            <input type="password" name="password" id="password" required />
+            <input
+              type="password"
+              name="password"
+              id="password"
+              defaultValue={actionData?.fields?.password}
+            />
             <div className="error">
               {actionData?.fieldErrors?.password ? (
                 <p
