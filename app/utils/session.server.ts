@@ -67,4 +67,12 @@ export const getUser = async (request: Request) => {
   }
 };
 
+// Logout Route
+export const logout = async (request: Request) => {
+  const session = await storage.getSession(request.headers.get("Cookie"));
+  return redirect("/auth/logout", {
+    headers: { "Set-Cookie": await storage.destroySession(session) },
+  });
+};
+
 //Register User
