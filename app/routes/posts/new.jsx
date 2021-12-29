@@ -13,6 +13,10 @@ const validateBody = (body) => {
   }
 };
 
+const badRequest = (data) => {
+  return json(data, { status: 400 });
+};
+
 export const action = async ({ request }) => {
   const form = await request.formData();
   const title = form.get("title");
@@ -22,11 +26,11 @@ export const action = async ({ request }) => {
   //validation
   const fieldErrors = {
     title: validateTitle(title),
-    body: validateBody(title),
+    body: validateBody(body),
   };
 
   if (Object.values(fieldErrors).some(Boolean)) {
-    return json({ fieldErrors, fields }, { status: 400 });
+    return badRequest({ fieldErrors, fields });
   }
 
   const post = await db.post.create({ data: fields });
@@ -56,10 +60,7 @@ const NewPost = () => {
               defaultValue={actionData?.fields?.title}
             />
             <div className="error">
-              <p>
-                {actionData?.fieldErrors?.title &&
-                  actionData?.fieldErrors?.title}
-              </p>
+              <p>{actionData?.fieldErrors?.title}</p>
             </div>
           </div>
           <div className="form-control">
@@ -71,10 +72,7 @@ const NewPost = () => {
               defaultValue={actionData?.fields?.title}
             />
             <div className="error">
-              <p>
-                {actionData?.fieldErrors?.title &&
-                  actionData?.fieldErrors?.title}
-              </p>
+              <p>{actionData?.fieldErrors?.body}</p>
             </div>
           </div>
           <button type="submit" className="btn btn-block">
