@@ -1,5 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const db = new PrismaClient();
+const prisma = new PrismaClient();
 
 const getPosts = () => {
   return [
@@ -23,9 +23,18 @@ const getPosts = () => {
 };
 
 const seed = async () => {
+  const kalson = await prisma.user.create({
+    data: {
+      username: "kalson",
+      passwordHash:
+        "$2b$10$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdWoXehVzJptJ/op0lSsvqNu/1u", // twixrox
+    },
+  });
+
   await Promise.all(
     getPosts().map((post) => {
-      return db.post.create({ data: post });
+      const data = { userId: kalson.id, ...post };
+      return prisma.post.create({ data: data });
     })
   );
 };
