@@ -1,6 +1,6 @@
 import { useActionData, json, redirect } from "remix";
 import { db } from "~/utils/db.server";
-import { login } from "~/utils/session.server";
+import { login, createUserSession } from "~/utils/session.server";
 
 function validateUsername(username) {
   if (typeof username !== "string" || username.length < 3) {
@@ -23,7 +23,8 @@ export const action = async ({ request }) => {
 
   // form data
   const loginType = form.get("loginType");
-  const username = form.get("username");0
+  const username = form.get("username");
+  0;
   const password = form.get("password");
 
   const fields = { loginType, username, password };
@@ -48,6 +49,9 @@ export const action = async ({ request }) => {
           fieldErrors: { username: "Invalid Credentials" },
         });
       }
+
+      //Create User Session
+      return createUserSession(user.id, "/posts");
     }
 
     case "register": {

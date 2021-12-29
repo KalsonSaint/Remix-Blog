@@ -6,8 +6,19 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "remix";
 import globalStyle from "~/styles/global.css";
+import { getUser } from "./utils/session.server";
+
+export const loader = async ({ request }) => {
+  const user = await getUser(request);
+  const data = {
+    user,
+  };
+
+  return data;
+};
 
 export function meta() {
   return {
@@ -29,7 +40,7 @@ export default function App() {
   );
 }
 
-const Document = ({ children, title }) => {
+const Document = ({ children }) => {
   return (
     <html lang="en">
       <head>
@@ -49,6 +60,8 @@ const Document = ({ children, title }) => {
 };
 
 const Layout = ({ children }) => {
+  const { user } = useLoaderData();
+
   return (
     <>
       <nav className="navbar">
@@ -59,9 +72,17 @@ const Layout = ({ children }) => {
           <li>
             <Link to="/posts">Posts</Link>
           </li>
-          <li>
-            <Link to="/auth/login">Login</Link>
-          </li>
+          {user ? (
+            <li>
+              <form action="'/auth/logout" method="POST">
+                <button className="btn btn-delete">Logout</button>
+              </form>
+            </li>
+          ) : (
+            <li>
+              <Link to="/auth/login">Login</Link>
+            </li>
+          )}
         </ul>
       </nav>
       <div className="container">{children}</div>
